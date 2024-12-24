@@ -1,6 +1,7 @@
 "use server";
 import db from "@/lib/db";
 import { z } from "zod";
+import bcrypt from "bcrypt";
 
 const passwordRegex = new RegExp(
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*?[#?!@$%^&*-]).+$/
@@ -83,6 +84,17 @@ export async function createAccount(prevState: any, formData: FormData) {
     //hash password and save user to edb
     //log the user in
     //redirect "/home"
-
+    const hashedPassword = await bcrypt.hash(result.data.password, 12);
+    const user = await db.user.create({
+      data: {
+        username: result.data.username,
+        email: result.data.email,
+        password: hashedPassword,
+      },
+      select: {
+        id: true,
+      },
+    });
+    console.log(user);
   }
 }
