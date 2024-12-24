@@ -1,9 +1,34 @@
 "use server";
+import db from "@/lib/db";
 import { z } from "zod";
 
 const passwordRegex = new RegExp(
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*?[#?!@$%^&*-]).+$/
 );
+
+const checkUsernameIsUnique = async (username: string) => {
+  const user = await db.user.findUnique({
+    where: {
+      username,
+    },
+    select: {
+      id: true,
+    },
+  });
+  return !Boolean(user);
+}
+
+const checkEmailIsUnique = async (email: string) => {
+  const user = await db.user.findUnique({
+    where: {
+      email,
+    },
+    select: {
+      id: true,
+    },
+  });
+  return !Boolean(user);
+}
 
 const formSchema = z
   .object({
@@ -16,19 +41,20 @@ const formSchema = z
       //.max(10, "That is too looooong!")
       .trim()
       .toLowerCase()
-      .transform((username) => `🔥 ${username}`)
+     // .transform((username) => `🔥 ${username}`)
       .refine(
         (username) => !username.includes("potato"),
         "No potatoes allowed!"
-      ),
-    email: z.string().email().toLowerCase(),
+      ).refine(checkUsernameIsUnique, "username is already taken"),
+    email: z.string().email().toLowerCase()
+      .refine(checkEmailIsUnique, "email is already taken"),
     password: z
       .string()
-      .min(4)
-      .regex(
-        passwordRegex,
-        "Passwords must contain at least one UPPERCASE, lowercase, number and special characters #?!@$%^&*-"
-      ),
+      .min(4),
+      // .regex(
+      //   passwordRegex,
+      //   "Passwords must contain at least one UPPERCASE, lowercase, number and special characters #?!@$%^&*-"
+      // ),
     confirm_password: z.string().min(4),
   })
   .superRefine(({ password, confirm_password }, ctx) => {
@@ -48,10 +74,15 @@ export async function createAccount(prevState: any, formData: FormData) {
     password: formData.get("password"),
     confirm_password: formData.get("confirm_password"),
   };
-  const result = formSchema.safeParse(data);
+  const result = await formSchema.safeParseAsync(data);
   if (!result.success) {
     return result.error.flatten();
   } else {
     console.log(result.data);
+    //check if username and email is already taken
+    //hash password and save user to edb
+    //log the user in
+    //redirect "/home"
+
   }
 }
