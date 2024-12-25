@@ -2,6 +2,9 @@
 import db from "@/lib/db";
 import { z } from "zod";
 import bcrypt from "bcrypt";
+import { getIronSession } from "iron-session";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 const passwordRegex = new RegExp(
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*?[#?!@$%^&*-]).+$/
@@ -80,10 +83,7 @@ export async function createAccount(prevState: any, formData: FormData) {
     return result.error.flatten();
   } else {
     console.log(result.data);
-    //check if username and email is already taken
-    //hash password and save user to edb
-    //log the user in
-    //redirect "/home"
+    //hash password and save user to db
     const hashedPassword = await bcrypt.hash(result.data.password, 12);
     const user = await db.user.create({
       data: {
@@ -96,5 +96,16 @@ export async function createAccount(prevState: any, formData: FormData) {
       },
     });
     console.log(user);
+    //log the user in
+    const cookie = await getIronSession(await cookies(), {
+      cookieName: "delicious-karrot",
+      password: process.env.COOKIE_PASSWORD!,
+    });
+    //@ts-ignore
+    cookie.id = user.id;
+    await cookie.save();
+    //redirect "/home"
+    redirect("/profile");
+    
   }
 }
