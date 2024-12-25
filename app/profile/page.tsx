@@ -13,7 +13,7 @@ async function getUser() {
         });
         return user;
     }
-    notFound(); //session id 가 없거나 user 가 없는 경우
+    notFound(); //session id 가 없거나 user 가 없는 경우 404 페이지 반환
 }
 
 export default async function Profile() {
