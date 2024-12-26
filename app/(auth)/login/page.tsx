@@ -21,7 +21,7 @@ export default function LogIn() {
           type="email"
           placeholder="Email"
           required
-          errors={state?.fieldErrors.email}
+          errors={state?.fieldErrors?.email}
         />
         <FormInput
           name="password"
@@ -29,7 +29,7 @@ export default function LogIn() {
           placeholder="Password"
           required
           minLength={PASSWORD_MIN_LENGTH}
-          errors={state?.fieldErrors.password}
+          errors={state?.fieldErrors?.password}
         />
         <FormButton text="Log in" />
       </form>
