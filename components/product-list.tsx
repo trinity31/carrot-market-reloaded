@@ -44,18 +44,6 @@ export default function ProductList({ initialProducts }: ProductListProps) {
     };
   }, [page]);
 
-  const onLoadMoreClick = async () => {
-    setIsLoading(true);
-    const newProducts = await getMoreProducts(page + 1);
-    if (newProducts.length != 0) {
-      setPage((prev) => prev + 1);
-      setProducts((prev) => [...prev, ...newProducts]);
-    } else {
-      setIsLastPage(true);
-    }
-    setIsLoading(false);
-  };
-
   return (
     <div className="p-5 flex flex-col gap-5">
       {products.map((product) => (
